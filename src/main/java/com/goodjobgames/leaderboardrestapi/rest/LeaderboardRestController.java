@@ -8,42 +8,65 @@ import com.goodjobgames.leaderboardrestapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("")
 public class LeaderboardRestController {
     private UserService userService;
-    private RankingUser topUser;
 
     @Autowired
     public LeaderboardRestController(UserService userService) {
         this.userService = userService;
-        topUser = userService.findTopUser();
     }
+
+    @GetMapping("/addUsers/{userCount}")
+    public void addUsers(@PathVariable int userCount) {
+        ArrayList<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < userCount; i++) {
+            ids.add(userService.createUser(Integer.toString(i), (Math.random() < 0.4) ? "fr" : "tr").getId());
+        }
+    }
+
+    @GetMapping("/simulate/{playFactor}")
+    public void simulateLeaderboard(@PathVariable int playFactor) {
+        List<RankingUser> users = userService.findAll();
+        for (RankingUser user : users) {
+            long start = System.currentTimeMillis();
+            for (int a = 0; a < playFactor; a++) {
+                SubmitScoreDto dto = new SubmitScoreDto();
+                dto.setUserId(user.getId());
+                dto.setNewScore(Math.random()*1);
+                submitScore(dto);
+            }
+            //System.out.println("Simulated user " + user.getDisplayName() + ", " + playCount + " score submissions took " + (System.currentTimeMillis() - start) + " millis(" + ((System.currentTimeMillis() - start)/((playCount != 0) ? playCount : 1)) + " avg.)");
+        }
+    }
+
 
     @GetMapping("/leaderboard")
     public List<LeaderboardUserDto> getLeaderboard() {
         List<LeaderboardUserDto> result = new ArrayList<>();
-        RankingUser temp = topUser;
-
+        RankingUser temp = userService.fetchDown(userService.getTopUser().getId());
+        Integer rank = 1;
         while (temp != null) {
-            result.add(temp.toLeaderboardDto());
+            result.add(temp.toLeaderboardDto(rank));
+            rank++;
             temp = temp.getDown();
         }
 
         return result;
     }
 
-    @GetMapping("/leaderboard/{country_iso}")
+    @GetMapping("/leaderboard/{countryIso}")
     public List<LeaderboardUserDto> getLeaderboard(@PathVariable String countryIso) {
         List<LeaderboardUserDto> result = new ArrayList<>();
-        RankingUser temp = topUser;
-
+        RankingUser temp = userService.fetchDown(userService.getTopUser().getId());
+        Integer rank = 1;
         while (temp != null) {
             if (temp.getCountryIso().equals(countryIso)) {
-                result.add(temp.toLeaderboardDto());
+                result.add(temp.toLeaderboardDto(rank));
+                rank++;
             }
             temp = temp.getDown();
         }
@@ -53,26 +76,6 @@ public class LeaderboardRestController {
 
     @PostMapping("/score/submit")
     public ProfileUserDto submitScore(@RequestBody SubmitScoreDto submitScoreDto) {
-        RankingUser user = userService.findUserById(submitScoreDto.getUserId());
-        if (user != null) {
-            user.getUp().setDown(user.getDown());
-            user.getDown().setUp(user.getUp());
-
-            RankingUser newUp = user.getUp();
-            Double newTotalScore = user.getPoints() + submitScoreDto.getNewScore();
-            while (newUp.getPoints() > newTotalScore) {
-                newUp = newUp.getUp();
-            }
-            if (newUp == null) {
-                topUser = user;
-            }
-            user.setUp(newUp);
-            user.setDown(newUp.getDown());
-            user.getDown().setUp(user);
-            user.getUp().setDown(user);
-
-        }
-
-        return user.toProfileDto();
+        return userService.submitScore(submitScoreDto);
     }
 }

@@ -6,6 +6,20 @@ import com.goodjobgames.leaderboardrestapi.dto.ProfileUserDto;
 import javax.persistence.*;
 import java.util.UUID;
 
+@NamedEntityGraph(
+        name = "down-user-graph",
+        attributeNodes = {
+                @NamedAttributeNode("down")
+        }
+)
+
+@NamedEntityGraph(
+        name = "up-user-graph",
+        attributeNodes = {
+                @NamedAttributeNode("up")
+        }
+)
+
 @Entity
 @Table(name = "ranking_users")
 public class RankingUser {
@@ -92,11 +106,11 @@ public class RankingUser {
         return dto;
     }
 
-    public LeaderboardUserDto toLeaderboardDto() {
+    public LeaderboardUserDto toLeaderboardDto(Integer rank) {
         LeaderboardUserDto dto = new LeaderboardUserDto();
         dto.setDisplayName(getDisplayName());
         dto.setPoints(getPoints());
-        dto.setRank(calculateRanking());
+        dto.setRank(rank);
         dto.setCountryIso(getCountryIso());
         return dto;
     }
