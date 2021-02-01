@@ -10,7 +10,7 @@ Db tablosunu oluşturan query "src/main/resources/static" dosyası içindedir.
   
   /leaderboard/{countryIso} (GET) -> returns country specific leaderboard
   
-  /score/submit (POST) : {"userId", "newScore"} -> submits score returns profile of user
+  /score/submit (POST) : {"userId", "newScore", "timestamp"} -> submits score returns profile of user
   
   /user/create (POST) : {"displayName", "countryIso"} -> creates a new user and returns profile
   
