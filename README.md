@@ -2,7 +2,7 @@ Leaderboard API
 
 Notlar:
 Scaling problemini çözmek adına leaderboard'u linkedlist olarak implement ettim.
-Projede genellikle scaling'e odaklandığım için lock kullanamadım, bu yüzden race conditionlarda db yapısının bozulması olağan.
+Projede genellikle scaling'e odaklandığım için lock kullanmadım, aynı anda birden fazla submitScore isteği geldiğinde db yapısı bozulabilir.
 Db tablosunu oluşturan query "src/main/resources/static" dosyası içindedir.  
 
 #Endpoints#
