@@ -1,5 +1,6 @@
 package com.goodjobgames.leaderboardrestapi.service;
 
+import com.goodjobgames.leaderboardrestapi.dto.LeaderboardUserDto;
 import com.goodjobgames.leaderboardrestapi.dto.ProfileUserDto;
 import com.goodjobgames.leaderboardrestapi.dto.SubmitScoreDto;
 import com.goodjobgames.leaderboardrestapi.entity.RankingUser;
@@ -12,13 +13,9 @@ public interface UserService {
 
     RankingUser getTopUser();
 
-    RankingUser getLastUser();
-
-    RankingUser fetchUp(UUID userId);
-
-    RankingUser fetchDown(UUID userId);
-
     RankingUser createUser(String displayName, String countryIso);
+
+    List<LeaderboardUserDto> getLeaderboard(String contryIso);
 
     ProfileUserDto submitScore(SubmitScoreDto submitScoreDto);
 
